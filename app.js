@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const pool = require("./database/bd");
+const pool = require("./data_base/bd");
 
 const app = express();
 app.use(express.json());
