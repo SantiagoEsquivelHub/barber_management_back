@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const pool = require("./database/bd");
 
 const app = express();
 app.use(express.json());
@@ -47,17 +48,24 @@ app.post("/usuario/login", (req, res) => {
 });
 
 
-app.get("/usuario/:id/", verifyToken, (req, res) => {
+app.get("/usuarios/:id/", verifyToken, async (req, res) => {
 
+    try {
+        const {id} = req.params;
+        const usuario = await pool.query("SELECT * FROM barbero WHERE id_barbero = $1;", [id]);
+        res.json(usuario.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
 
-const datos = [
-    {id: 1, cliente: "Santiago", total: 2500},
-    {id: 2, cliente: "Alejandro", total: 2500},
-    {id: 3, cliente: "Sebastian", total: 2500},
-    {id: 4, cliente: "Javier", total: 2500}
-];
-res.json(datos);
-
+app.get("/usuarios/", verifyToken, async (req, res) => {
+    try {
+        const usuarios = await pool.query("SELECT * FROM barbero;");
+        res.json(usuarios.rows);
+    } catch (err) {
+        console.log(err) 
+    }
 });
 
 app.listen(3001, () => {
