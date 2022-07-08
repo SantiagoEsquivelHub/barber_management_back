@@ -23,6 +23,8 @@ const verifyToken = (req, res, next) => {
     });
 }
 
+/* Creamos el API para el login con el webt token */
+
 app.post("/usuario/login", (req, res) => {
     const usuario = req.body.usuario;
     const clave = req.body.clave;
@@ -47,22 +49,47 @@ app.post("/usuario/login", (req, res) => {
     }
 });
 
-
-app.get("/usuarios/:id/", verifyToken, async (req, res) => {
+/* Creamos el API para obtener la informacion de un barbero por su ID */
+app.get("/barberos/:id/", verifyToken, async (req, res) => {
 
     try {
         const {id} = req.params;
-        const usuario = await pool.query("SELECT * FROM barbero WHERE id_barbero = $1;", [id]);
-        res.json(usuario.rows);
+        const barbero = await pool.query("SELECT * FROM barbero WHERE id_barbero = $1;", [id]);
+        res.json(barbero.rows);
     } catch (err) {
         console.log(err) 
     }
 });
 
-app.get("/usuarios/", verifyToken, async (req, res) => {
+/* Creamos el API para obtener todos los barberos */
+app.get("/barberos/", verifyToken, async (req, res) => {
     try {
-        const usuarios = await pool.query("SELECT * FROM barbero;");
-        res.json(usuarios.rows);
+        const barberos = await pool.query("SELECT * FROM barbero;");
+        res.json(barberos.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
+
+/* Creamos el API para obtener la informacion de un administrador por su ID */
+
+app.get("/administradores/:id/", verifyToken, async (req, res) => {
+
+    try {
+        const {id} = req.params;
+        const administrador = await pool.query("SELECT * FROM administrador WHERE id_admin = $1;", [id]);
+        res.json(administrador.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
+
+/* Creamos el API para obtener todos los administradores */
+
+app.get("/administradores/", verifyToken, async (req, res) => {
+    try {
+        const administradores = await pool.query("SELECT * FROM administrador;");
+        res.json(administradores.rows);
     } catch (err) {
         console.log(err) 
     }
