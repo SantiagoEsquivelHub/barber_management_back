@@ -8,6 +8,14 @@ app.use(cors());
 
 const TOKEN_KEY = "x4TvnErxRETbVcqaLl5dqMI115eNlp5y";
 
+app.use('/login', (req, res) => {
+    res.send({
+      token: TOKEN_KEY
+    });
+  });
+
+
+
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -39,12 +47,16 @@ app.post("/usuario/login", (req, res) => {
             {expiresIn: "2h"}
         );
 
+        
+
             let nDatos = {...datos, token};
         res.status(200).json(nDatos);
     } else {
         res.status(400).send("Credenciales incorrectas");
     }
 });
+
+
 
 
 app.get("/usuario/:id/", verifyToken, (req, res) => {
