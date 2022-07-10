@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const pool = require("./data_base/bd");
 
 const app = express();
 app.use(express.json());
@@ -21,6 +22,8 @@ const verifyToken = (req, res, next) => {
         next();
     });
 }
+
+/* Creamos el API para el login con el webt token */
 
 app.post("/usuario/login", (req, res) => {
     const usuario = req.body.usuario;
@@ -46,18 +49,50 @@ app.post("/usuario/login", (req, res) => {
     }
 });
 
+/* Creamos el API para obtener la informacion de un barbero por su ID */
+app.get("/barberos/:id/", verifyToken, async (req, res) => {
 
-app.get("/usuario/:id/", verifyToken, (req, res) => {
+    try {
+        const {id} = req.params;
+        const barbero = await pool.query("SELECT * FROM barbero WHERE id_barbero = $1;", [id]);
+        res.json(barbero.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
 
+/* Creamos el API para obtener todos los barberos */
+app.get("/barberos/", verifyToken, async (req, res) => {
+    try {
+        const barberos = await pool.query("SELECT * FROM barbero;");
+        res.json(barberos.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
 
-const datos = [
-    {id: 1, cliente: "Santiago", total: 2500},
-    {id: 2, cliente: "Alejandro", total: 2500},
-    {id: 3, cliente: "Sebastian", total: 2500},
-    {id: 4, cliente: "Javier", total: 2500}
-];
-res.json(datos);
+/* Creamos el API para obtener la informacion de un administrador por su ID */
 
+app.get("/administradores/:id/", verifyToken, async (req, res) => {
+
+    try {
+        const {id} = req.params;
+        const administrador = await pool.query("SELECT * FROM administrador WHERE id_admin = $1;", [id]);
+        res.json(administrador.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
+
+/* Creamos el API para obtener todos los administradores */
+
+app.get("/administradores/", verifyToken, async (req, res) => {
+    try {
+        const administradores = await pool.query("SELECT * FROM administrador;");
+        res.json(administradores.rows);
+    } catch (err) {
+        console.log(err) 
+    }
 });
 
 app.listen(3001, () => {
