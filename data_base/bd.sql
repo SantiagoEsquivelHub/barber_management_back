@@ -1,62 +1,64 @@
 
-
-/*Creamos la base de datos*/
-CREATE DATABASE management;
-
-
-/*Creamos la tabla Administrador */
-CREATE TABLE administrador(
-    id_admin SERIAL,
-    nombre_admin VARCHAR NULL, 
-    documento_admin INT NULL,
-    telefono_admin INT NULL,
-    fecha_nacimiento_admin DATE NULL,
-    rol_admin INT NULL,
-    url_img_admin VARCHAR NULL,
-    PRIMARY KEY (id_admin)
+/*Creamos la tabla Rol */
+CREATE TABLE rol(
+    id_rol SERIAL,
+    nombre_rol VARCHAR NULL, 
+    PRIMARY KEY (id_rol)
 );
 
-/*Creamos la tabla Barberos */
-CREATE TABLE barbero(
-    id_barbero SERIAL,
-    nombre_barbero VARCHAR NULL,
-    documento_barbero INT NULL,
-    telefono_barbero INT NULL,
-    fecha_nacimiento_admin DATE NULL,
-    rol_barbero INT NULL,
-    salario_barbero INT NULL,
-    url_img_barbero VARCHAR NULL,
-    estado_barbero INT NULL,
-    PRIMARY KEY (id_barbero)
+/*Creamos la tabla Usuario */
+CREATE TABLE usuario(
+    id_usuario SERIAL,
+    nombre_usuario VARCHAR NULL, 
+    documento_usuario INT NULL,
+    telefono_usuario INT NULL,
+    fecha_nacimiento_usuario DATE NULL,
+    estado_usuario INT NULL,
+    url_img_usuario VARCHAR NULL,
+    rol_usuario INT NULL,
+    PRIMARY KEY (id_usuario),
+    FOREIGN KEY (rol_usuario) REFERENCES rol(id_rol)
 );
 
-
-/*Creamos la tabla de Contrataciones */
-CREATE TABLE contratacion(
-    id_contratacion SERIAL,
-    id_barbero INT NOT NULL,
-    id_admin INT NOT NULL, 
-    PRIMARY KEY (id_contratacion),
-    FOREIGN KEY (id_barbero) REFERENCES barbero(id_barbero),
-    FOREIGN KEY (id_admin) REFERENCES administrador(id_admin)
+/*Creamos la tabla Contrataciones */
+CREATE TABLE contrataciones(
+    id_contrataciones SERIAL,
+    id_admin INT NULL,
+    id_barbero INT NULL,
+    PRIMARY KEY (id_contrataciones),
+    FOREIGN KEY (id_admin) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_barbero) REFERENCES usuario(id_usuario)
 );
 
-/*Creamos la tabla de Servicios*/
+/*Creamos la tabla Servicio */
 CREATE TABLE servicio(
     id_servicio SERIAL,
-    nombre_servicio VARCHAR NOT NULL,
-    precio_servicio MONEY NULL, 
+    nombre_servicio VARCHAR NULL,
+    precio_servicio INT NULL, 
     PRIMARY KEY (id_servicio)
 );
 
-
-/*Creamos la tabla de Historial para el registro de los servicios*/
-CREATE TABLE historial(
-    id_historial SERIAL,
-    id_barbero INT NULL,
+/*Creamos la tabla Cita */
+CREATE TABLE cita(
+    id_cita SERIAL,
+    nombre_cliente VARCHAR NULL,
+    hora_cita DATE NULL,
     id_servicio INT NULL, 
-    fecha_servicio DATE NULL,
-    PRIMARY KEY (id_historial),
-    FOREIGN KEY (id_barbero) REFERENCES barbero(id_barbero),
+    PRIMARY KEY (id_cita),
     FOREIGN KEY (id_servicio) REFERENCES servicio(id_servicio)
 );
+
+
+/*Creamos la tabla Historial */
+CREATE TABLE historial(
+    id_historial SERIAL,
+    id_usuario INT NULL,
+    id_cita INT NULL,
+    PRIMARY KEY (id_historial),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_cita) REFERENCES cita(id_cita)
+);
+
+/* 
+INSERT INTO usuario(nombre_usuario, documento_usuario)
+VALUES('Administrador', 12345); */
