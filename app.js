@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const pool = require("./data_base/bd");
 
 const app = express();
 app.use(express.json());
@@ -30,6 +31,8 @@ const verifyToken = (req, res, next) => {
     });
 }
 
+/* Creamos el API para el login con el webt token */
+
 app.post("/usuario/login", (req, res) => {
     const usuario = req.body.usuario;
     const clave = req.body.clave;
@@ -56,20 +59,51 @@ app.post("/usuario/login", (req, res) => {
     }
 });
 
+/* Creamos el API para obtener la informacion de un usuario por su ID */
+app.get("/usuarios/:id/", verifyToken, async (req, res) => {
 
+    try {
+        const {id} = req.params;
+        const usuarios = await pool.query("SELECT * FROM usuario WHERE id_usuario = $1;", [id]);
+        res.json(usuarios.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
 
+/* Creamos el API para obtener todos los usuarios */
+app.get("/usuarios/", async (req, res) => {
+    try {
+        console.log('holaa');
+        const usuarios = await pool.query('SELECT * FROM usuario;');
+        res.status(200).json(usuarios.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
 
-app.get("/usuario/:id/", verifyToken, (req, res) => {
+/* Creamos el API para obtener la informacion de un barbero por su ID */
 
+app.get("/barberos/:id/", verifyToken, async (req, res) => {
 
-const datos = [
-    {id: 1, cliente: "Santiago", total: 2500},
-    {id: 2, cliente: "Alejandro", total: 2500},
-    {id: 3, cliente: "Sebastian", total: 2500},
-    {id: 4, cliente: "Javier", total: 2500}
-];
-res.json(datos);
+    try {
+        const {id} = req.params;
+        const barberos = await pool.query("SELECT * FROM administrador WHERE estado_usuario = 1 AND id_usuario = $1;", [id]);
+        res.json(barberos.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
 
+/* Creamos el API para obtener todos los barberos activos */
+
+app.get("/barberos/", verifyToken, async (req, res) => {
+    try {
+        const barberos = await pool.query("SELECT * FROM usuario WHERE estado_usuario = 1;");
+        res.json(barberos.rows);
+    } catch (err) {
+        console.log(err) 
+    }
 });
 
 app.listen(3001, () => {
