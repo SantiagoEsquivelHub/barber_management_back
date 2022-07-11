@@ -1,3 +1,5 @@
+CREATE DATABASE management;
+
 
 /*Creamos la tabla Rol */
 CREATE TABLE rol(
@@ -13,6 +15,7 @@ CREATE TABLE usuario(
     documento_usuario INT NULL,
     telefono_usuario INT NULL,
     fecha_nacimiento_usuario DATE NULL,
+    correo_usuario VARCHAR
     estado_usuario INT NULL,
     url_img_usuario VARCHAR NULL,
     rol_usuario INT NULL,

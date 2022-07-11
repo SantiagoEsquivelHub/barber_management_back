@@ -72,11 +72,11 @@ app.get("/usuarios/:id/", verifyToken, async (req, res) => {
 });
 
 /* Creamos el API para obtener todos los usuarios */
-app.get("/usuarios/", async (req, res) => {
+app.get("/usuarios", async (req, res) => {
     try {
-        console.log('holaa');
-        const usuarios = await pool.query('SELECT * FROM usuario;');
-        res.status(200).json(usuarios.rows);
+        const usuarios = await pool.query("SELECT * FROM usuario;");
+
+        res.json(usuarios.rows);
     } catch (err) {
         console.log(err) 
     }
@@ -104,6 +104,10 @@ app.get("/barberos/", verifyToken, async (req, res) => {
     } catch (err) {
         console.log(err) 
     }
+});
+
+app.get("/hola/", async (req, res) => {
+ 
 });
 
 app.listen(3001, () => {
