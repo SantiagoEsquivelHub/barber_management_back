@@ -15,7 +15,7 @@ CREATE TABLE usuario(
     documento_usuario INT NULL,
     telefono_usuario INT NULL,
     fecha_nacimiento_usuario DATE NULL,
-    correo_usuario VARCHAR
+    correo_usuario VARCHAR,
     estado_usuario INT NULL,
     url_img_usuario VARCHAR NULL,
     rol_usuario INT NULL,
@@ -65,3 +65,13 @@ CREATE TABLE historial(
 /* 
 INSERT INTO usuario(nombre_usuario, documento_usuario)
 VALUES('Administrador', 12345); */
+
+
+INSERT INTO usuario(nombre_usuario,  correo_usuario , documento_usuario)
+VALUES('Administrador', 'hola@gmail.com' , 12345); 
+
+INSERT INTO usuario(nombre_usuario,  correo_usuario , documento_usuario)
+VALUES('Alejandro', 'alejandrovillamilcarmona@gmail.com' , 1193142843); 
+
+INSERT INTO usuario(nombre_usuario,  correo_usuario , documento_usuario)
+VALUES('Santiago ', 'santiagosancheze8.1@gmail.com' , 1005784999); 

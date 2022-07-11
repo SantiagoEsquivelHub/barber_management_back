@@ -31,28 +31,33 @@ const verifyToken = (req, res, next) => {
     });
 }
 
+
+const getCredentials = (email , doc) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT correo_usuario , documento_usuario FROM usuario WHERE correo_usuario = '$1';", [email], (err, rows) => {
+            if (err) reject(err)
+            resolve(rows)
+        });
+    })
+}
+
+
 /* Creamos el API para el login con el webt token */
 
-app.post("/usuario/login", (req, res) => {
+app.post("/usuario/login", async (req, res) => {
     const usuario = req.body.usuario;
     const clave = req.body.clave;
+    const use = await pool.query("SELECT correo_usuario , documento_usuario , id_usuario FROM usuario WHERE correo_usuario = $1;", [usuario]);
 
-    if (usuario == "administrador" && clave == "12345") {
-        const datos = {
-            id: "123",
-            nombre: "Administrador",
-            email: "santiagosancheze8.1@gmail.com"
-        };
-
+    if (usuario == use.rows[0].correo_usuario && clave == use.rows[0].documento_usuario) {
+       
         const token = jwt.sign(
-            {userId: datos.id, email: datos.email},
+            {userId: use.rows[0].id_usuario, email: use.rows[0].correo_usuario },
             TOKEN_KEY,
             {expiresIn: "2h"}
         );
 
-        
-
-            let nDatos = {...datos, token};
+        let nDatos = {token, ...use.rows};
         res.status(200).json(nDatos);
     } else {
         res.status(400).send("Credenciales incorrectas");
