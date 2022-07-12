@@ -36,7 +36,7 @@ app.post("/usuario/login", async (req, res) => {
     const usuario = req.body.usuario;
     const clave = req.body.clave;
     const use = await pool.query("SELECT correo_usuario , documento_usuario , id_usuario FROM usuario WHERE correo_usuario = $1;", [usuario]);
-
+    console.log(use.rows[0]);
     if (usuario == use.rows[0].correo_usuario && clave == use.rows[0].documento_usuario) {
        
         const token = jwt.sign(
@@ -74,6 +74,18 @@ app.get("/usuarios", verifyToken , async (req, res) => {
         console.log(err) 
     }
 });
+
+/* Creamos el API para obtener todos los usuarios */
+app.get("/roles", verifyToken , async (req, res) => {
+    try {
+        const roles = await pool.query("SELECT * FROM rol;");
+
+        res.json(roles.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
+
 
 
 /* Creamos el API para la creación de un nuevo usuario */
