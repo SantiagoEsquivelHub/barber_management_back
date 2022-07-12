@@ -31,19 +31,7 @@ const verifyToken = (req, res, next) => {
     });
 }
 
-
-const getCredentials = (email , doc) => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT correo_usuario , documento_usuario FROM usuario WHERE correo_usuario = '$1';", [email], (err, rows) => {
-            if (err) reject(err)
-            resolve(rows)
-        });
-    })
-}
-
-
 /* Creamos el API para el login con el webt token */
-
 app.post("/usuario/login", async (req, res) => {
     const usuario = req.body.usuario;
     const clave = req.body.clave;
@@ -65,19 +53,19 @@ app.post("/usuario/login", async (req, res) => {
 });
 
 /* Creamos el API para obtener la informacion de un usuario por su ID */
-app.get("/usuarios/:id/", verifyToken, async (req, res) => {
-
+app.get("/usuarios/:id_usuario/", verifyToken, async (req, res) => {
     try {
-        const {id} = req.params;
-        const usuarios = await pool.query("SELECT * FROM usuario WHERE id_usuario = $1;", [id]);
+        const {id_usuario} = req.params;
+        const usuarios = await pool.query("SELECT * FROM usuario WHERE id_usuario = $1;", [id_usuario]);
         res.json(usuarios.rows);
     } catch (err) {
         console.log(err) 
     }
 });
 
+
 /* Creamos el API para obtener todos los usuarios */
-app.get("/usuarios", async (req, res) => {
+app.get("/usuarios", verifyToken , async (req, res) => {
     try {
         const usuarios = await pool.query("SELECT * FROM usuario;");
 
@@ -87,33 +75,45 @@ app.get("/usuarios", async (req, res) => {
     }
 });
 
-/* Creamos el API para obtener la informacion de un barbero por su ID */
 
-app.get("/barberos/:id/", verifyToken, async (req, res) => {
+/* Creamos el API para la creación de un nuevo usuario */
+app.post("/usuario", verifyToken , async (req, res) => {
+    const { nombre_usuario , documento_usuario , telefono_usuario , fecha_nacimiento_usuario , correo_usuario , estado_usuario , url_img_usuario , rol_usuario } = req.body 
+    
+    /* Validamos que el usuario no este creado primero */
+    const verificarCorreo = await pool.query("SELECT correo_usuario FROM usuario WHERE correo_usuario = $1;", [req.body.correo_usuario]);
+    if (verificarCorreo.rows != ''){
+        if (verificarCorreo.rows[0].correo_usuario == req.body.correo_usuario){
+            res.status(400).send("El usuario ya existe :(");
+        }
+    }else{ /* Si no esta creado entonces lo creamos */
+        try {
+            const crearUsuario = await pool.query(`INSERT INTO usuario(nombre_usuario , documento_usuario , telefono_usuario , fecha_nacimiento_usuario , correo_usuario , estado_usuario , url_img_usuario , rol_usuario) VALUES ('${nombre_usuario}', ${documento_usuario}, ${telefono_usuario}, '${fecha_nacimiento_usuario}', '${correo_usuario}', ${estado_usuario}, '${url_img_usuario}', ${rol_usuario});`, function (err, result) {
+                if (err) {
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query', err);
+                }
+                res.status(200).send("Usuario creado con Exito :)");
+            });
+        } catch (err) {
+            console.log(err) 
+        }
+    }
+});
 
+
+
+/* Creamos el API para actualizar la informacion de un usuario por su ID ----- Falta por revisar funcionalidad ----- */ 
+app.get("/usuarios/:id/", verifyToken, async (req, res) => {
     try {
-        const {id} = req.params;
-        const barberos = await pool.query("SELECT * FROM administrador WHERE estado_usuario = 1 AND id_usuario = $1;", [id]);
-        res.json(barberos.rows);
+        const {nombre_usuario , documento_usuario , telefono_usuario , fecha_nacimiento_usuario , correo_usuario , estado_usuario} = req.params;
+        const usuarios = await pool.query("UPDATE usuario SET  WHERE id_usuario = $1;", [id]);
+        res.json(usuarios.rows);
     } catch (err) {
         console.log(err) 
     }
 });
 
-/* Creamos el API para obtener todos los barberos activos */
-
-app.get("/barberos/", verifyToken, async (req, res) => {
-    try {
-        const barberos = await pool.query("SELECT * FROM usuario WHERE estado_usuario = 1;");
-        res.json(barberos.rows);
-    } catch (err) {
-        console.log(err) 
-    }
-});
-
-app.get("/hola/", async (req, res) => {
- 
-});
 
 app.listen(3001, () => {
     console.log("Servidor iniciado el puerto 3001");
