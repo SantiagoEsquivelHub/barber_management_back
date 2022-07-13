@@ -3,6 +3,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const pool = require("./data_base/bd");
 
+
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -75,7 +77,7 @@ app.get("/usuarios", verifyToken , async (req, res) => {
     }
 });
 
-/* Creamos el API para obtener todos los usuarios */
+/* Creamos el API para obtener todos los roles*/
 app.get("/roles", verifyToken , async (req, res) => {
     try {
         const roles = await pool.query("SELECT * FROM rol;");
@@ -127,6 +129,3 @@ app.get("/usuarios/:id/", verifyToken, async (req, res) => {
 });
 
 
-app.listen(3001, () => {
-    console.log("Servidor iniciado el puerto 3001");
-})
