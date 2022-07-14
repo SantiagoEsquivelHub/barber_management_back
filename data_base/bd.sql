@@ -1,5 +1,11 @@
 CREATE DATABASE management;
 
+/*Creamos la tabla Estado */
+CREATE TABLE estado(
+    id_estado INT,
+    nombre_estado VARCHAR NULL, 
+    PRIMARY KEY (id_estado)
+);
 
 /*Creamos la tabla Rol */
 CREATE TABLE rol(
@@ -16,11 +22,12 @@ CREATE TABLE usuario(
     telefono_usuario INT NULL,
     fecha_nacimiento_usuario DATE NULL,
     correo_usuario VARCHAR,
-    estado_usuario INT NULL,
     url_img_usuario VARCHAR NULL,
+    estado_usuario INT NULL,
     rol_usuario INT NULL,
     PRIMARY KEY (id_usuario),
-    FOREIGN KEY (rol_usuario) REFERENCES rol(id_rol)
+    FOREIGN KEY (rol_usuario) REFERENCES rol(id_rol),
+    FOREIGN KEY (estado_usuario) REFERENCES estado(id_estado)
 );
 
 /*Creamos la tabla Contrataciones */
@@ -84,3 +91,7 @@ VALUES('Sebastian ', 'sebastian.rey@correounivalle.edu.co' , 119341658);
 
 INSERT INTO rol(nombre_rol)
 VALUES('Administrador') , ('Barbero'); 
+
+INSERT INTO estado
+VALUES(1, 'Activo'),
+(0, 'Deshabilitado')

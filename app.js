@@ -66,7 +66,9 @@ app.post("/usuario/login", async (req, res) => {
 app.get("/usuarios/:id/", verifyToken, async (req, res) => {
     let {id} = req.params;
     try {
-        const usuario = await pool.query(`SELECT * FROM usuario WHERE id_usuario = ${id};`);
+        const usuario = await pool.query(`SELECT * FROM usuario AS u
+         JOIN estado AS e ON u.estado_usuario = e.id_estado
+          JOIN rol AS r ON u.rol_usuario = r.id_rol WHERE id_usuario = ${id};`);
         res.json(usuario.rows);
     } catch (err) {
         console.log(err) 
