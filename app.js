@@ -171,7 +171,7 @@ app.get("/roles", verifyToken, async (req, res) => {
 
 /*----------- BUSQUEDA ------------- */
 /* Creamos el API para obtener la busqueda con sus datos especificos */
-app.get("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
+app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
     const { itemForSearch } = req.params;
     const { page } = req.body;
     let limit = parseFloat(10);
@@ -195,19 +195,16 @@ app.get("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
         JOIN estado AS e ON u.estado_usuario = e.id_estado
         JOIN rol AS r ON u.rol_usuario = r.id_rol
         WHERE
-        (nombre_usuario LIKE '%Diego%'
-        OR documento_usuario LIKE '%{itemForSearch}%'
-        OR telefono_usuario LIKE '%{itemForSearch}%'
-        OR correo_usuario LIKE '%{itemForSearch}%'
-        OR nombre_estado LIKE '%{itemForSearch}%'
+        (nombre_usuario LIKE '%${itemForSearch}%'
+        OR documento_usuario LIKE '%${itemForSearch}%'
+        OR telefono_usuario LIKE '%${itemForSearch}%'
+        OR correo_usuario LIKE '%${itemForSearch}%'
+        OR nombre_estado LIKE '%${itemForSearch}%'
         )
         LIMIT ${limit}
         ;`)
 
-
-
        
-
         let count = cantidad.rows[0]['cantidad'];
 
         //pages (cantidad total de paginas)
