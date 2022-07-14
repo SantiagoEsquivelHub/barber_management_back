@@ -18,8 +18,8 @@ CREATE TABLE rol(
 CREATE TABLE usuario(
     id_usuario SERIAL,
     nombre_usuario VARCHAR NULL, 
-    documento_usuario INT NULL,
-    telefono_usuario INT NULL,
+    documento_usuario VARCHAR NULL,
+    telefono_usuario VARCHAR NULL,
     fecha_nacimiento_usuario DATE NULL,
     correo_usuario VARCHAR,
     url_img_usuario VARCHAR NULL,
