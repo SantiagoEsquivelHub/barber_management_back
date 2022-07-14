@@ -76,5 +76,11 @@ VALUES('Alejandro', 'alejandrovillamilcarmona@gmail.com' , 1193142843);
 INSERT INTO usuario(nombre_usuario,  correo_usuario , documento_usuario)
 VALUES('Santiago ', 'santiagosancheze8.1@gmail.com' , 1005784999); 
 
+INSERT INTO usuario(nombre_usuario,  correo_usuario , documento_usuario)
+VALUES('Javier ', 'javier.castrillon@correounivalle.edu.co' , 1006206865); 
+
+INSERT INTO usuario(nombre_usuario,  correo_usuario , documento_usuario)
+VALUES('Sebastian ', 'sebastian.rey@correounivalle.edu.co' , 119341658); 
+
 INSERT INTO rol(nombre_rol)
 VALUES('Administrador') , ('Barbero'); 

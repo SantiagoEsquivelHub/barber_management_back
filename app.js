@@ -2,12 +2,16 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const pool = require("./data_base/bd");
-
-
-
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
+
+app.use(cors());
+
+/*----------- AUTENTICACIÓN ------------- */
 
 const TOKEN_KEY = "x4TvnErxRETbVcqaLl5dqMI115eNlp5y";
 
@@ -16,8 +20,6 @@ app.use('/login', (req, res) => {
       token: TOKEN_KEY
     });
   });
-
-
 
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -54,12 +56,18 @@ app.post("/usuario/login", async (req, res) => {
     }
 });
 
+/*----------- FIN AUTENTICACIÓN ------------- */
+
+
+
+/*----------- USUARIOS ------------- */
+
 /* Creamos el API para obtener la informacion de un usuario por su ID */
-app.get("/usuarios/:id_usuario/", verifyToken, async (req, res) => {
+app.get("/usuarios/:id/", verifyToken, async (req, res) => {
+    let {id} = req.params;
     try {
-        const {id_usuario} = req.params;
-        const usuarios = await pool.query("SELECT * FROM usuario WHERE id_usuario = $1;", [id_usuario]);
-        res.json(usuarios.rows);
+        const usuario = await pool.query(`SELECT * FROM usuario WHERE id_usuario = ${id};`);
+        res.json(usuario.rows);
     } catch (err) {
         console.log(err) 
     }
@@ -69,29 +77,16 @@ app.get("/usuarios/:id_usuario/", verifyToken, async (req, res) => {
 /* Creamos el API para obtener todos los usuarios */
 app.get("/usuarios", verifyToken , async (req, res) => {
     try {
-        const usuarios = await pool.query("SELECT * FROM usuario;");
-
+        const usuarios = await pool.query("SELECT * FROM usuario ORDER BY nombre_usuario ASC;");
         res.json(usuarios.rows);
     } catch (err) {
         console.log(err) 
     }
 });
 
-/* Creamos el API para obtener todos los roles*/
-app.get("/roles", verifyToken , async (req, res) => {
-    try {
-        const roles = await pool.query("SELECT * FROM rol;");
-
-        res.json(roles.rows);
-    } catch (err) {
-        console.log(err) 
-    }
-});
-
-
 
 /* Creamos el API para la creación de un nuevo usuario */
-app.post("/usuario", verifyToken , async (req, res) => {
+app.post("/crearUsuario", verifyToken , async (req, res) => {
     const { nombre_usuario , documento_usuario , telefono_usuario , fecha_nacimiento_usuario , correo_usuario , estado_usuario , url_img_usuario , rol_usuario } = req.body 
     
     /* Validamos que el usuario no este creado primero */
@@ -109,7 +104,7 @@ app.post("/usuario", verifyToken , async (req, res) => {
                 }
                 res.status(200).send("Usuario creado con Exito :)");
             });
-        } catch (err) {
+        }catch (err) {
             console.log(err) 
         }
     }
@@ -117,15 +112,67 @@ app.post("/usuario", verifyToken , async (req, res) => {
 
 
 
-/* Creamos el API para actualizar la informacion de un usuario por su ID ----- Falta por revisar funcionalidad ----- */ 
-app.get("/usuarios/:id/", verifyToken, async (req, res) => {
+/* Creamos el API para actualizar la informacion de un usuario por su ID */ 
+app.post("/editarUsuario/:id/", verifyToken, async (req, res) => {
+    const { nombre_usuario ,estado_usuario , url_img_usuario, telefono_usuario } = req.body;
+    const {id} = req.params
+
     try {
-        const {nombre_usuario , documento_usuario , telefono_usuario , fecha_nacimiento_usuario , correo_usuario , estado_usuario} = req.params;
-        const usuarios = await pool.query("UPDATE usuario SET  WHERE id_usuario = $1;", [id]);
-        res.json(usuarios.rows);
-    } catch (err) {
+        const actualizarUsuario = await pool.query(`UPDATE usuario SET nombre_usuario = '${nombre_usuario}' , url_img_usuario = '${url_img_usuario}' , estado_usuario = ${estado_usuario}, telefono_usuario = ${telefono_usuario}  WHERE id_usuario = ${id};`, function (err, result) {
+            if (err) {
+                console.log(err)
+                res.status(400).send("Error en el query");
+                return console.error('error en el query', err);
+            }
+            res.status(200).send("Usuario actualizado con Exito :)");
+        });
+    }catch (err) {
         console.log(err) 
     }
 });
 
 
+/* Creamos el API para eliminar un usuario por su ID */ 
+app.post("/eliminarUsuario/:id/", verifyToken, async (req, res) => {
+    const {id} = req.params
+    
+    try {
+        const borrarUsuario = await pool.query(`DELETE FROM usuario WHERE id_usuario = ${id};`, function (err, result) {
+            if (err) {
+                res.status(400).send("Error en el query");
+                return console.error('error en el query', err);
+            }
+            res.status(200).send("Usuario eliminado con Exito :)");
+        });
+    }catch (err) {
+        console.log(err) 
+    }
+});
+
+/*----------- FIN USUARIOS ------------- */
+
+
+/*----------- ROLES ------------- */
+
+/* Creamos el API para obtener todos los roles */
+app.get("/roles", verifyToken , async (req, res) => {
+    try {
+        const roles = await pool.query("SELECT * FROM rol;");
+
+        res.json(roles.rows);
+    } catch (err) {
+        console.log(err) 
+    }
+});
+
+/*----------- FIN ROLES ------------- */
+
+
+
+/*----------- SERVIDOR ------------- */
+
+app.listen(3001, () => {
+    console.log("Servidor iniciado el puerto 3001");
+})
+
+/*----------- FIN SERVIDOR ------------- */
