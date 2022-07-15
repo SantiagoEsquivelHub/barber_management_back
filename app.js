@@ -80,7 +80,11 @@ app.get("/usuarios/:id/", verifyToken, async (req, res) => {
 app.get("/usuarios", verifyToken, async (req, res) => {
     try {
         const usuarios = await pool.query("SELECT * FROM usuario ORDER BY nombre_usuario ASC;");
-        res.json(usuarios.rows);
+        const cantidad = await pool.query(`SELECT count(1) AS cantidad FROM usuario;`)
+        let count = cantidad.rows[0]['cantidad'];
+        res.json({
+            cantidad: count,
+            result: usuarios.rows});
     } catch (err) {
         console.log(err)
     }
@@ -211,16 +215,22 @@ app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
     let limit = parseFloat(10);
 
     try {
+
+
+
+
+
         const cantidad = await pool.query(`SELECT 
         count(*) AS cantidad 
         FROM usuario AS u 
         JOIN estado AS e ON u.estado_usuario = e.id_estado
+        JOIN rol AS r ON u.rol_usuario = r.id_rol
         WHERE
         (nombre_usuario LIKE '%${itemForSearch}%'
         OR documento_usuario LIKE '%${itemForSearch}%'
         OR telefono_usuario LIKE '%${itemForSearch}%'
         OR correo_usuario LIKE '%${itemForSearch}%'
-        OR nombre_estado LIKE '%${itemForSearch}%'
+        OR nombre_rol LIKE '%${itemForSearch}%'
         );`);
 
         const busqueda = await pool.query(`SELECT 
@@ -234,11 +244,12 @@ app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
         OR telefono_usuario LIKE '%${itemForSearch}%'
         OR correo_usuario LIKE '%${itemForSearch}%'
         OR nombre_estado LIKE '%${itemForSearch}%'
+        OR nombre_rol LIKE '%${itemForSearch}%'
         )
         LIMIT ${limit}
         ;`)
 
-       
+
         let count = cantidad.rows[0]['cantidad'];
 
         //pages (cantidad total de paginas)
@@ -261,9 +272,11 @@ app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
         }
 
         res.json(data);
+
     } catch (err) {
         console.log(err)
     }
+
 });
 
 
