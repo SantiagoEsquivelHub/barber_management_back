@@ -124,14 +124,48 @@ app.post("/editarUsuario/:id/", verifyToken, async (req, res) => {
     const { id } = req.params
 
     try {
-        const actualizarUsuario = await pool.query(`UPDATE usuario SET nombre_usuario = '${nombre_usuario}' , url_img_usuario = '${url_img_usuario}' , estado_usuario = ${estado_usuario}, telefono_usuario = ${telefono_usuario}  WHERE id_usuario = ${id};`, function (err, result) {
-            if (err) {
-                console.log(err)
-                res.status(400).send("Error en el query");
-                return console.error('error en el query', err);
-            }
-            res.status(200).send("Usuario actualizado con Exito :)");
-        });
+        if(nombre_usuario !== ""){
+            const actualizarNombre = await pool.query(`UPDATE usuario SET nombre_usuario = '${nombre_usuario}' WHERE id_usuario = ${id};`, function (err, result) {
+                if (err) {
+                    console.log(err + " Actualizando el Nombre")
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query', err);
+                }
+                
+            });
+        }
+        if(estado_usuario !== ""){
+            const actualizarEstado = await pool.query(`UPDATE usuario SET estado_usuario = ${estado_usuario} WHERE id_usuario = ${id};`, function (err, result) {
+                if (err) {
+                    console.log(err + " Actualizando el Estado")
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query', err);
+                }
+                
+            });
+        }
+        if(url_img_usuario !== ""){
+            const actualizarUrl = await pool.query(`UPDATE usuario SET url_img_usuario = '${url_img_usuario}' WHERE id_usuario = ${id};`, function (err, result) {
+                if (err) {
+                    console.log(err + " Actualizando el Url")
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query', err);
+                }
+                
+            });
+        }
+        
+        if(telefono_usuario !== ""){
+            const actualizarTelefono = await pool.query(`UPDATE usuario SET telefono_usuario = ${telefono_usuario} WHERE id_usuario = ${id};`, function (err, result) {
+                if (err) {
+                    console.log(err + " Actualizando el Telefono")
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query', err);
+                }
+                
+            });
+        }
+        res.status(200).send("Usuario actualizado con Exito :)");
     } catch (err) {
         console.log(err)
     }
