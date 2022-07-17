@@ -84,7 +84,8 @@ app.get("/usuarios", verifyToken, async (req, res) => {
         let count = cantidad.rows[0]['cantidad'];
         res.json({
             cantidad: count,
-            result: usuarios.rows});
+            result: usuarios.rows
+        });
     } catch (err) {
         console.log(err)
     }
@@ -124,45 +125,45 @@ app.post("/editarUsuario/:id/", verifyToken, async (req, res) => {
     const { id } = req.params
 
     try {
-        if(nombre_usuario !== ""){
+        if (nombre_usuario !== "") {
             const actualizarNombre = await pool.query(`UPDATE usuario SET nombre_usuario = '${nombre_usuario}' WHERE id_usuario = ${id};`, function (err, result) {
                 if (err) {
                     console.log(err + " Actualizando el Nombre")
                     res.status(400).send("Error en el query");
                     return console.error('error en el query', err);
                 }
-                
+
             });
         }
-        if(estado_usuario !== ""){
+        if (estado_usuario !== "") {
             const actualizarEstado = await pool.query(`UPDATE usuario SET estado_usuario = ${estado_usuario} WHERE id_usuario = ${id};`, function (err, result) {
                 if (err) {
                     console.log(err + " Actualizando el Estado")
                     res.status(400).send("Error en el query");
                     return console.error('error en el query', err);
                 }
-                
+
             });
         }
-        if(url_img_usuario !== ""){
+        if (url_img_usuario !== "") {
             const actualizarUrl = await pool.query(`UPDATE usuario SET url_img_usuario = '${url_img_usuario}' WHERE id_usuario = ${id};`, function (err, result) {
                 if (err) {
                     console.log(err + " Actualizando el Url")
                     res.status(400).send("Error en el query");
                     return console.error('error en el query', err);
                 }
-                
+
             });
         }
-        
-        if(telefono_usuario !== ""){
+
+        if (telefono_usuario !== "") {
             const actualizarTelefono = await pool.query(`UPDATE usuario SET telefono_usuario = ${telefono_usuario} WHERE id_usuario = ${id};`, function (err, result) {
                 if (err) {
                     console.log(err + " Actualizando el Telefono")
                     res.status(400).send("Error en el query");
                     return console.error('error en el query', err);
                 }
-                
+
             });
         }
         res.status(200).send("Usuario actualizado con Exito :)");
@@ -191,6 +192,24 @@ app.post("/eliminarUsuario/:id/", verifyToken, async (req, res) => {
 
 /*----------- FIN USUARIOS ------------- */
 
+/*----------- BARBEROS ------------- */
+
+/* Creamos el API para obtener todos los barberos */
+app.get("/barberos", verifyToken, async (req, res) => {
+    try {
+        const barberos = await pool.query("SELECT * FROM usuario AS u JOIN rol AS r ON u.rol_usuario = r.id_rol WHERE r.nombre_rol = 'Barbero' ORDER BY nombre_usuario ASC;");
+        const cantidad = await pool.query(`SELECT count(1) AS cantidad FROM usuario AS u JOIN rol AS r ON u.rol_usuario = r.id_rol WHERE r.nombre_rol = 'Barbero';`)
+        let count = cantidad.rows[0]['cantidad'];
+        res.json({
+            cantidad: count,
+            result: barberos.rows
+        });
+    } catch (err) {
+        console.log(err)
+    }
+});
+
+/*----------- FIN BARBEROS ------------- */
 
 /*----------- ROLES ------------- */
 
@@ -210,22 +229,54 @@ app.get("/roles", verifyToken, async (req, res) => {
 /*----------- BUSQUEDA ------------- */
 /* Creamos el API para obtener la busqueda con sus datos especificos */
 app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
-    const { itemForSearch } = req.params;
-    const { page } = req.body;
+    let { page } = req.body;
+    let { type } = req.body;
+    let { itemForSearch } = req.params;
     let limit = parseFloat(10);
 
+    //let offset = (page - 1) * limit;
     try {
+        let cantidad;
+        let busqueda;
+        if (type == 'usuarios') {
 
+            cantidad = await pool.query(`SELECT 
+    count(*) AS cantidad 
+    FROM usuario AS u 
+    JOIN estado AS e ON u.estado_usuario = e.id_estado
+    JOIN rol AS r ON u.rol_usuario = r.id_rol
+    WHERE
+    (nombre_usuario LIKE '%${itemForSearch}%'
+    OR documento_usuario LIKE '%${itemForSearch}%'
+    OR telefono_usuario LIKE '%${itemForSearch}%'
+    OR correo_usuario LIKE '%${itemForSearch}%'
+    OR nombre_rol LIKE '%${itemForSearch}%'
+    );`);
 
+            busqueda = await pool.query(`SELECT 
+    *
+    FROM usuario AS u 
+    JOIN estado AS e ON u.estado_usuario = e.id_estado
+    JOIN rol AS r ON u.rol_usuario = r.id_rol
+    WHERE
+    (nombre_usuario LIKE '%${itemForSearch}%'
+    OR documento_usuario LIKE '%${itemForSearch}%'
+    OR telefono_usuario LIKE '%${itemForSearch}%'
+    OR correo_usuario LIKE '%${itemForSearch}%'
+    OR nombre_estado LIKE '%${itemForSearch}%'
+    OR nombre_rol LIKE '%${itemForSearch}%'
+    )
+    LIMIT ${limit}
+   
+    ;`)
+        } else {
 
-
-
-        const cantidad = await pool.query(`SELECT 
+            cantidad = await pool.query(`SELECT 
         count(*) AS cantidad 
         FROM usuario AS u 
         JOIN estado AS e ON u.estado_usuario = e.id_estado
         JOIN rol AS r ON u.rol_usuario = r.id_rol
-        WHERE
+        WHERE r.nombre_rol = 'Barbero' AND 
         (nombre_usuario LIKE '%${itemForSearch}%'
         OR documento_usuario LIKE '%${itemForSearch}%'
         OR telefono_usuario LIKE '%${itemForSearch}%'
@@ -233,12 +284,12 @@ app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
         OR nombre_rol LIKE '%${itemForSearch}%'
         );`);
 
-        const busqueda = await pool.query(`SELECT 
+            busqueda = await pool.query(`SELECT 
         *
         FROM usuario AS u 
         JOIN estado AS e ON u.estado_usuario = e.id_estado
         JOIN rol AS r ON u.rol_usuario = r.id_rol
-        WHERE
+        WHERE r.nombre_rol = 'Barbero' AND 
         (nombre_usuario LIKE '%${itemForSearch}%'
         OR documento_usuario LIKE '%${itemForSearch}%'
         OR telefono_usuario LIKE '%${itemForSearch}%'
@@ -247,7 +298,10 @@ app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
         OR nombre_rol LIKE '%${itemForSearch}%'
         )
         LIMIT ${limit}
+       
         ;`)
+        }
+
 
 
         let count = cantidad.rows[0]['cantidad'];
@@ -262,6 +316,7 @@ app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {
         let next = page + 1 <= cantidadpages ? page + 1 : null;
 
         let data = {
+            page: page,
             count: count,
             pages: cantidadpages,
             current_page: page,
