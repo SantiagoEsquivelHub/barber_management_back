@@ -226,6 +226,33 @@ app.get("/roles", verifyToken, async (req, res) => {
 
 /*----------- FIN ROLES ------------- */
 
+/*----------- SERVICIOS ------------- */
+
+/* Creamos el API para obtener todos los servicios */
+app.get("/servicio", verifyToken, async (req, res) => {
+    try {
+        const servicios = await pool.query("SELECT * FROM servicio;");
+
+        res.json(servicios.rows);
+    } catch (err) {
+        console.log(err)
+    }
+});
+
+/* Creamos el API para obtener el precio de un servicio por su ID */
+app.get("/servicio/:id/", verifyToken, async (req, res) => {
+    let { id } = req.params;
+    try {
+        const servicio = await pool.query(`SELECT precio_servicio FROM servicio WHERE id_servicio = ${id};`);
+        res.json(servicio.rows);
+    } catch (err) {
+        console.log(err)
+    }
+});
+
+
+/*----------- FIN SERVICIOS ------------- */
+
 /*----------- BUSQUEDA ------------- */
 /* Creamos el API para obtener la busqueda con sus datos especificos */
 app.post("/busqueda/:itemForSearch/", verifyToken, async (req, res) => {

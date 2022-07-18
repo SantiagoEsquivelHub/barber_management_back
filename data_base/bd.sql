@@ -52,7 +52,7 @@ CREATE TABLE servicio(
 CREATE TABLE cita(
     id_cita SERIAL,
     nombre_cliente VARCHAR NULL,
-    hora_cita DATE NULL,
+    fecha_cita DATE NULL,
     id_servicio INT NULL, 
     PRIMARY KEY (id_cita),
     FOREIGN KEY (id_servicio) REFERENCES servicio(id_servicio)
@@ -95,3 +95,8 @@ VALUES('Administrador') , ('Barbero');
 INSERT INTO estado
 VALUES(1, 'Activo'),
 (0, 'Deshabilitado')
+
+INSERT INTO servicio(nombre_servicio, precio_servicio)
+VALUES('Corte básico', 15000),
+('Barba', 5000),
+('Corte básico y Barba', 19000)
