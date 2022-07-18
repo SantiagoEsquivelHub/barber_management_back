@@ -211,6 +211,27 @@ app.get("/barberos", verifyToken, async (req, res) => {
 
 /*----------- FIN BARBEROS ------------- */
 
+/*----------- CITAS ------------- */
+
+/* Creamos el API para la creación de un nuevo usuario */
+app.post("/crearCita", verifyToken, async (req, res) => {
+    const { nombre_cliente, fecha_cita, id_servicio } = req.body
+        try {
+            const crearCita = await pool.query(`INSERT INTO cita(nombre_cliente, fecha_cita, id_servicio) VALUES ('${nombre_cliente}', '${fecha_cita}', ${id_servicio});`, function (err, result) {
+                if (err) {
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query', err);
+                }
+                res.status(200).send("Cita creada con Exito :)");
+            });
+        } catch (err) {
+            console.log(err)
+        }
+    
+});
+
+/*----------- FIN CITAS ------------- */
+
 /*----------- ROLES ------------- */
 
 /* Creamos el API para obtener todos los roles */

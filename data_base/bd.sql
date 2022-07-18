@@ -52,7 +52,7 @@ CREATE TABLE servicio(
 CREATE TABLE cita(
     id_cita SERIAL,
     nombre_cliente VARCHAR NULL,
-    fecha_cita DATE NULL,
+    fecha_cita TIMESTAMP NULL,
     id_servicio INT NULL, 
     PRIMARY KEY (id_cita),
     FOREIGN KEY (id_servicio) REFERENCES servicio(id_servicio)
