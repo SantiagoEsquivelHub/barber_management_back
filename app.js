@@ -232,6 +232,7 @@ app.post("/crearCita", verifyToken, async (req, res) => {
 
 /*----------- FIN CITAS ------------- */
 
+
 /*----------- CONTRATACIONES ------------- */
 
 /* Creamos el API para la creación de un nuevo usuario */
@@ -273,6 +274,7 @@ app.post("/crearHistorial", verifyToken, async (req, res) => {
 });
 
 /*----------- FIN HISTORIAL ------------- */
+
 
 /*----------- ROLES ------------- */
 
