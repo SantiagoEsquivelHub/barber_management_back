@@ -259,7 +259,7 @@ app.post("/crearContratacion", verifyToken, async (req, res) => {
 app.post("/crearHistorial", verifyToken, async (req, res) => {
     const { id_usuario, id_cita } = req.body
         try {
-            const crearCita = await pool.query(`INSERT INTO contrataciones(id_usuario , id_cita ) VALUES (${id_usuario}, ${id_cita});`, function (err, result) {
+            const crearCita = await pool.query(`INSERT INTO historial(id_usuario , id_cita ) VALUES (${id_usuario}, ${id_cita});`, function (err, result) {
                 if (err) {
                     res.status(400).send("Error en el query");
                     return console.error('error en el query', err);
