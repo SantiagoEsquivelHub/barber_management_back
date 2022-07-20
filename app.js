@@ -216,19 +216,34 @@ app.get("/barberos", verifyToken, async (req, res) => {
 /* Creamos el API para la creación de un nuevo usuario */
 app.post("/crearCita", verifyToken, async (req, res) => {
     const { nombre_cliente, fecha_cita, id_servicio } = req.body
-        try {
-            const crearCita = await pool.query(`INSERT INTO cita(nombre_cliente, fecha_cita, id_servicio) VALUES ('${nombre_cliente}', '${fecha_cita}', ${id_servicio});`, function (err, result) {
-                if (err) {
-                    res.status(400).send("Error en el query");
-                    return console.error('error en el query', err);
-                }
-                res.status(200).send("Cita creada con Exito :)");
-            });
-        } catch (err) {
-            console.log(err)
-        }
-    
+    try {
+        const crearCita = await pool.query(`INSERT INTO cita(nombre_cliente, fecha_cita, id_servicio) VALUES ('${nombre_cliente}', '${fecha_cita}', ${id_servicio});`, function (err, result) {
+            if (err) {
+                res.status(400).send("Error en el query");
+                return console.error('error en el query', err);
+            }
+            res.status(200).send("Cita creada con Exito :)");
+        });
+
+
+    } catch (err) {
+        console.log(err)
+    }
+
 });
+
+/* Creamos el API para obtener todos los roles */
+app.post("/idCita", verifyToken, async (req, res) => {
+    const { nombre_cliente, fecha_cita, id_servicio } = req.body
+   
+    try {
+        const id_cita = await pool.query(`SELECT id_cita FROM cita WHERE nombre_cliente = '${nombre_cliente}' AND fecha_cita = '${fecha_cita}' AND id_servicio = ${id_servicio}`);
+        res.json(id_cita.rows);
+    } catch (err) {
+        console.log(err)
+    }
+});
+
 
 /*----------- FIN CITAS ------------- */
 
@@ -238,18 +253,18 @@ app.post("/crearCita", verifyToken, async (req, res) => {
 /* Creamos el API para la creación de un nuevo usuario */
 app.post("/crearContratacion", verifyToken, async (req, res) => {
     const { id_admin, id_barbero } = req.body
-        try {
-            const crearCita = await pool.query(`INSERT INTO contrataciones(id_admin , id_barbero) VALUES (${id_admin}, ${id_barbero});`, function (err, result) {
-                if (err) {
-                    res.status(400).send("Error en el query");
-                    return console.error('error en el query', err);
-                }
-                res.status(200).send("Contratación creada con Exito :)");
-            });
-        } catch (err) {
-            console.log(err)
-        }
-    
+    try {
+        const crearCita = await pool.query(`INSERT INTO contrataciones(id_admin , id_barbero) VALUES (${id_admin}, ${id_barbero});`, function (err, result) {
+            if (err) {
+                res.status(400).send("Error en el query");
+                return console.error('error en el query', err);
+            }
+            res.status(200).send("Contratación creada con Exito :)");
+        });
+    } catch (err) {
+        console.log(err)
+    }
+
 });
 
 /*----------- FIN CONTRATACIONES ------------- */
@@ -259,18 +274,18 @@ app.post("/crearContratacion", verifyToken, async (req, res) => {
 /* Creamos el API para la creación de un nuevo usuario */
 app.post("/crearHistorial", verifyToken, async (req, res) => {
     const { id_usuario, id_cita } = req.body
-        try {
-            const crearCita = await pool.query(`INSERT INTO historial(id_usuario , id_cita ) VALUES (${id_usuario}, ${id_cita});`, function (err, result) {
-                if (err) {
-                    res.status(400).send("Error en el query");
-                    return console.error('error en el query', err);
-                }
-                res.status(200).send("Historial creado con Exito :)");
-            });
-        } catch (err) {
-            console.log(err)
-        }
-    
+    try {
+        const crearCita = await pool.query(`INSERT INTO historial(id_usuario , id_cita ) VALUES (${id_usuario}, ${id_cita});`, function (err, result) {
+            if (err) {
+                res.status(400).send("Error en el query");
+                return console.error('error en el query', err);
+            }
+            res.status(200).send("Historial creado con Exito :)");
+        });
+    } catch (err) {
+        console.log(err)
+    }
+
 });
 
 /*----------- FIN HISTORIAL ------------- */
