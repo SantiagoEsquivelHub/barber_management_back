@@ -94,9 +94,9 @@ VALUES('Administrador') , ('Barbero');
 
 INSERT INTO estado
 VALUES(1, 'Activo'),
-(0, 'Deshabilitado')
+(0, 'Deshabilitado');
 
 INSERT INTO servicio(nombre_servicio, precio_servicio)
 VALUES('Corte básico', 15000),
 ('Barba', 5000),
-('Corte básico y Barba', 19000)
+('Corte básico y Barba', 19000);
