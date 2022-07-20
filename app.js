@@ -9,8 +9,6 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 
-app.use(cors());
-
 /*----------- AUTENTICACIÓN ------------- */
 
 const TOKEN_KEY = "x4TvnErxRETbVcqaLl5dqMI115eNlp5y";
@@ -49,14 +47,23 @@ app.post("/usuario/login", async (req, res) => {
             { expiresIn: "2h" }
         );
 
-        let nDatos = { token, ...use.rows };
+        //Traemos la información del usuario cuando ya se confirma la autenticación
+        const info = await pool.query("SELECT nombre_usuario , nombre_rol , url_img_usuario FROM usuario INNER JOIN rol ON rol.id_rol = usuario.rol_usuario WHERE correo_usuario = $1;", [usuario]);
+        let nDatos = { token, ...info.rows[0] };
+        
         res.status(200).json(nDatos);
     } else {
         res.status(400).send("Credenciales incorrectas");
     }
 });
 
-/*----------- FIN AUTENTICACIÓN ------------- */
+
+/*----------- FIN AUTENTICACIÓN
+Nombre
+Nombre del rol
+url_img
+
+------------- */
 
 
 
@@ -183,12 +190,84 @@ app.post("/eliminarUsuario/:id/", verifyToken, async (req, res) => {
                 res.status(400).send("Error en el query");
                 return console.error('error en el query', err);
             }
-            res.status(200).send("Usuario eliminado con Exito :)");
+            res.status(200).json(borrarUsuario.rows);;
         });
     } catch (err) {
         console.log(err)
     }
 });
+
+/* Creamos el API para obtener las citas registradas hoy por un usuario */
+app.get("/serviciosHoy/:id/", verifyToken, async (req, res) => {
+    let { id } = req.params;
+    try {
+        const serviciosHoy = await pool.query(
+        `select count(*) from historial as h
+        join cita as c on c.id_cita = h.id_cita
+        where to_char(c.fecha_cita, 'yy/mm/dd') = to_char(current_timestamp, 'yy/mm/dd') AND h.id_usuario =${id};`, 
+        function (err, result) {
+            if (err) {
+                res.status(400).send("Error en el query");
+                return console.error('error en el query', err);
+            }
+            res.json(result.rows[0].count);
+        });
+        
+    } catch (err) {
+        console.log(err)
+    }
+});
+
+/* Creamos el API para obtener las citas registradas en el mes por un usuario */
+app.get("/serviciosMes/:id/", verifyToken, async (req, res) => {
+    let { id } = req.params;
+    try {
+        const serviciosMes = await pool.query(
+        `select count(*) from historial as h
+        join cita as c on c.id_cita = h.id_cita
+        where to_char(c.fecha_cita, 'yy/mm/') = to_char(current_timestamp, 'yy/mm/') AND h.id_usuario =${id};`, 
+        function (err, result) {
+            if (err) {
+                res.status(400).send("Error en el query");
+                return console.error('error en el query', err);
+            }
+            res.json(result.rows[0].count);
+        });
+        
+    } catch (err) {
+        console.log(err)
+    }
+});
+
+/* Creamos el API para obtener el promedio de citas registradas por un usuario */
+app.get("/serviciosPromedio/:id/", verifyToken, async (req, res) => {
+    let { id } = req.params;
+
+    const verificarHistorial = await pool.query("select count(DISTINCT to_char(c.fecha_cita, 'yy/mm/dd')) from historial as h join cita as c on c.id_cita = h.id_cita where h.id_usuario = $1", [id]);
+    if (verificarHistorial.rows[0].count == 0) {
+        res.json(0);
+    } else { 
+        try {
+            const promedioServicios = await pool.query(
+            `select 
+            (select count(*) from historial as h
+            join cita as c on c.id_cita = h.id_cita where h.id_usuario = ${id})
+            / (select count(DISTINCT to_char(c.fecha_cita, 'yy/mm/dd')) from historial as h
+            join cita as c on c.id_cita = h.id_cita where h.id_usuario = ${id}) as resultado;`, 
+            function (err, result) {
+                if (err) {
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query: ', err);
+                }
+                res.json(result.rows[0]);
+            });
+            
+        } catch (err) {
+            console.log(err)
+        }
+    }
+});
+
 
 /*----------- FIN USUARIOS ------------- */
 
