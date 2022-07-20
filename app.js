@@ -259,7 +259,7 @@ app.get("/serviciosPromedio/:id/", verifyToken, async (req, res) => {
                     res.status(400).send("Error en el query");
                     return console.error('error en el query: ', err);
                 }
-                res.json(result.rows[0]);
+                res.json(result.rows[0].resultado);
             });
             
         } catch (err) {
