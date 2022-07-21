@@ -275,7 +275,7 @@ app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
 
     try {
         const historialServicios = await pool.query(
-            `SELECT s.nombre_servicio, c.fecha_cita, s.precio_servicio, c.nombre_cliente FROM cita AS c
+            `SELECT s.nombre_servicio, to_char(c.fecha_cita,'yyyy-mm-dd HH12:MI:SS AM') as fecha_cita, s.precio_servicio, c.nombre_cliente FROM cita AS c
             JOIN historial AS h ON c.id_cita = h.id_cita
             JOIN servicio AS s ON s.id_servicio = c.id_servicio
             WHERE id_usuario = ${id}
