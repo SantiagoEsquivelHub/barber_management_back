@@ -274,8 +274,8 @@ app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
 
     try {
-        const hisotorialServicios = await pool.query(
-            `SELECT s.nombre_servicio, c.fecha_cita, s.precio_servicio FROM cita AS c
+        const historialServicios = await pool.query(
+            `SELECT s.nombre_servicio, c.fecha_cita, s.precio_servicio, c.nombre_cliente FROM cita AS c
             JOIN historial AS h ON c.id_cita = h.id_cita
             JOIN servicio AS s ON s.id_servicio = c.id_servicio
             WHERE id_usuario = ${id}
@@ -285,7 +285,7 @@ app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
                     res.status(400).send("Error en el query");
                     return console.error('error en el query: ', err);
                 }
-                res.json(result.rows[0].resultado);
+                res.json(result.rows);
             });
 
     } catch (err) {
