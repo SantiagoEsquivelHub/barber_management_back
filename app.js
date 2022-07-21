@@ -48,7 +48,7 @@ app.post("/usuario/login", async (req, res) => {
         );
 
         //Traemos la información del usuario cuando ya se confirma la autenticación
-        const info = await pool.query("SELECT nombre_usuario , nombre_rol , url_img_usuario FROM usuario INNER JOIN rol ON rol.id_rol = usuario.rol_usuario WHERE correo_usuario = $1;", [usuario]);
+        const info = await pool.query("SELECT id_usuario, nombre_usuario , nombre_rol , url_img_usuario FROM usuario INNER JOIN rol ON rol.id_rol = usuario.rol_usuario WHERE correo_usuario = $1;", [usuario]);
         let nDatos = { token, ...info.rows[0] };
 
         res.status(200).json(nDatos);
@@ -197,7 +197,12 @@ app.post("/eliminarUsuario/:id/", verifyToken, async (req, res) => {
     }
 });
 
-/* Creamos el API para obtener las citas registradas hoy por un usuario */
+/*----------- FIN USUARIOS ------------- */
+
+/*----------- BARBEROS ------------- */
+
+
+/* Creamos el API para obtener las citas registradas hoy por un barbero */
 app.get("/serviciosHoy/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
     try {
@@ -218,7 +223,7 @@ app.get("/serviciosHoy/:id/", verifyToken, async (req, res) => {
     }
 });
 
-/* Creamos el API para obtener las citas registradas en el mes por un usuario */
+/* Creamos el API para obtener las citas registradas en el mes por un barbero */
 app.get("/serviciosMes/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
     try {
@@ -239,7 +244,7 @@ app.get("/serviciosMes/:id/", verifyToken, async (req, res) => {
     }
 });
 
-/* Creamos el API para obtener el promedio de citas registradas por un usuario */
+/* Creamos el API para obtener el promedio de citas registradas por un barbero */
 app.get("/serviciosPromedio/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
 
@@ -269,7 +274,7 @@ app.get("/serviciosPromedio/:id/", verifyToken, async (req, res) => {
 });
 
 
-/* Creamos el API para obetener el historial de servicios que tiene el barero */
+/* Creamos el API para obetener el historial de servicios que tiene el barbero */
 app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
 
@@ -295,9 +300,35 @@ app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
 });
 
 
-/*----------- FIN USUARIOS ------------- */
+/* Creamos el API para obetener el historial de servicios que tiene el barbero, nombre del servicio y su precio */
+app.get("/serviciosMesGrafico/:id/", verifyToken, async (req, res) => {
+    let { id } = req.params;
 
-/*----------- BARBEROS ------------- */
+    try {
+        const historialServicios = await pool.query(
+            `SELECT s.nombre_servicio, count(*)  FROM cita AS c
+            JOIN historial AS h ON c.id_cita = h.id_cita
+            JOIN servicio AS s ON s.id_servicio = c.id_servicio
+            WHERE h.id_usuario = '${id}' AND to_char(current_timestamp, 'yy/mm/') = to_char(c.fecha_cita, 'yy/mm/') 
+            GROUP BY s.nombre_servicio;`,
+            function (err, result) {
+                if (err) {
+                    res.status(400).send("Error en el query");
+                    return console.error('error en el query: ', err);
+                }
+                res.json(result.rows);
+            });
+
+    } catch (err) {
+        console.log(err)
+    }
+
+});
+
+
+
+
+
 
 /* Creamos el API para obtener todos los barberos */
 app.get("/barberos", verifyToken, async (req, res) => {
