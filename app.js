@@ -22,12 +22,12 @@ app.use('/login', (req, res) => {
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    console.log(authHeader);
+    //console.log(authHeader);
     if (token == null)
         return res.status(401).send("Token requerido");
     jwt.verify(token, TOKEN_KEY, (err, user) => {
         if (err) return res.status(403).send("Token invalido");
-        console.log(user);
+        //console.log(user);
         req.user = user;
         next();
     });
@@ -38,7 +38,7 @@ app.post("/usuario/login", async (req, res) => {
     const usuario = req.body.usuario;
     const clave = req.body.clave;
     const use = await pool.query("SELECT correo_usuario , documento_usuario , id_usuario FROM usuario WHERE correo_usuario = $1;", [usuario]);
-    console.log(use.rows[0]);
+    //console.log(use.rows[0]);
     if (usuario == use.rows[0].correo_usuario && clave == use.rows[0].documento_usuario) {
 
         const token = jwt.sign(
@@ -206,17 +206,33 @@ app.post("/eliminarUsuario/:id/", verifyToken, async (req, res) => {
 app.get("/serviciosHoy/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
     try {
-        const serviciosHoy = await pool.query(
-            `select count(*) from historial as h
-        join cita as c on c.id_cita = h.id_cita
-        where to_char(c.fecha_cita, 'yy/mm/dd') = to_char(current_timestamp, 'yy/mm/dd') AND h.id_usuario =${id};`,
-            function (err, result) {
-                if (err) {
-                    res.status(400).send("Error en el query");
-                    return console.error('error en el query', err);
-                }
-                res.json(result.rows[0].count);
-            });
+        let serviciosHoy = '';
+        if (id === '0') {
+            serviciosHoy = await pool.query(
+                `select count(*) from historial as h
+            join cita as c on c.id_cita = h.id_cita
+            where to_char(c.fecha_cita, 'yy/mm/dd') = to_char(current_timestamp, 'yy/mm/dd');`,
+                function (err, result) {
+                    if (err) {
+                        res.status(400).send("Error en el query");
+                        return console.error('error en el query', err);
+                    }
+                    res.json(result.rows[0].count);
+                });
+        } else {
+            serviciosHoy = await pool.query(
+                `select count(*) from historial as h
+            join cita as c on c.id_cita = h.id_cita
+            where to_char(c.fecha_cita, 'yy/mm/dd') = to_char(current_timestamp, 'yy/mm/dd') AND h.id_usuario =${id};`,
+                function (err, result) {
+                    if (err) {
+                        res.status(400).send("Error en el query");
+                        return console.error('error en el query', err);
+                    }
+                    res.json(result.rows[0].count);
+                });
+        }
+
 
     } catch (err) {
         console.log(err)
@@ -227,17 +243,33 @@ app.get("/serviciosHoy/:id/", verifyToken, async (req, res) => {
 app.get("/serviciosMes/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
     try {
-        const serviciosMes = await pool.query(
-            `select count(*) from historial as h
-        join cita as c on c.id_cita = h.id_cita
-        where to_char(c.fecha_cita, 'yy/mm/') = to_char(current_timestamp, 'yy/mm/') AND h.id_usuario =${id};`,
-            function (err, result) {
-                if (err) {
-                    res.status(400).send("Error en el query");
-                    return console.error('error en el query', err);
-                }
-                res.json(result.rows[0].count);
-            });
+        let serviciosMes = '';
+        if (id === '0') {
+            serviciosMes = await pool.query(
+                `select count(*) from historial as h
+                join cita as c on c.id_cita = h.id_cita
+                where to_char(c.fecha_cita, 'yy/mm/') = to_char(current_timestamp, 'yy/mm/');`,
+                function (err, result) {
+                    if (err) {
+                        res.status(400).send("Error en el query");
+                        return console.error('error en el query', err);
+                    }
+                    res.json(result.rows[0].count);
+                });
+        } else {
+            serviciosMes = await pool.query(
+                `select count(*) from historial as h
+                join cita as c on c.id_cita = h.id_cita
+                where to_char(c.fecha_cita, 'yy/mm/') = to_char(current_timestamp, 'yy/mm/') AND h.id_usuario =${id};`,
+                function (err, result) {
+                    if (err) {
+                        res.status(400).send("Error en el query");
+                        return console.error('error en el query', err);
+                    }
+                    res.json(result.rows[0].count);
+                });
+        }
+
 
     } catch (err) {
         console.log(err)
@@ -249,27 +281,47 @@ app.get("/serviciosPromedio/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
 
     const verificarHistorial = await pool.query("select count(DISTINCT to_char(c.fecha_cita, 'yy/mm/dd')) from historial as h join cita as c on c.id_cita = h.id_cita where h.id_usuario = $1", [id]);
-    if (verificarHistorial.rows[0].count == 0) {
+    if (verificarHistorial.rows[0].count == 0 && id != 0) {
         res.json(0);
     } else {
         try {
-            const promedioServicios = await pool.query(
-                `select 
+            let promedioServicios = '';
+            if (id === '0') {
+                promedioServicios = await pool.query(
+                    `select 
+            (select count(*) from historial as h
+            join cita as c on c.id_cita = h.id_cita)
+            / (select count(DISTINCT to_char(c.fecha_cita, 'yy/mm/dd')) from historial as h
+            join cita as c on c.id_cita = h.id_cita) as resultado;`,
+                    function (err, result) {
+                        if (err) {
+                            res.status(400).send("Error en el query");
+                            return console.error('error en el query: ', err);
+                        }
+
+                        res.json(result.rows[0].resultado);
+                    });
+            } else {
+
+                promedioServicios = await pool.query(
+                    `select 
             (select count(*) from historial as h
             join cita as c on c.id_cita = h.id_cita where h.id_usuario = ${id})
             / (select count(DISTINCT to_char(c.fecha_cita, 'yy/mm/dd')) from historial as h
             join cita as c on c.id_cita = h.id_cita where h.id_usuario = ${id}) as resultado;`,
-                function (err, result) {
-                    if (err) {
-                        res.status(400).send("Error en el query");
-                        return console.error('error en el query: ', err);
-                    }
-                    res.json(result.rows[0].resultado);
-                });
+                    function (err, result) {
+                        if (err) {
+                            res.status(400).send("Error en el query");
+                            return console.error('error en el query: ', err);
+                        }
+                        res.json(result.rows[0].resultado);
+                    });
+            }
 
         } catch (err) {
             console.log(err)
         }
+
     }
 });
 
@@ -281,10 +333,10 @@ app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
     try {
         const historialServicios = await pool.query(
             `SELECT s.nombre_servicio, to_char(c.fecha_cita,'yyyy-mm-dd HH12:MI:SS AM') as fecha_cita, s.precio_servicio, c.nombre_cliente FROM cita AS c
-            JOIN historial AS h ON c.id_cita = h.id_cita
-            JOIN servicio AS s ON s.id_servicio = c.id_servicio
-            WHERE id_usuario = ${id}
-            ORDER BY c.fecha_cita DESC;`,
+                JOIN historial AS h ON c.id_cita = h.id_cita
+                JOIN servicio AS s ON s.id_servicio = c.id_servicio
+                WHERE id_usuario = ${id}
+                ORDER BY c.fecha_cita DESC;`,
             function (err, result) {
                 if (err) {
                     res.status(400).send("Error en el query");
@@ -303,14 +355,57 @@ app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
 /* Creamos el API para obetener el historial de servicios que tiene el barbero, nombre del servicio y su precio */
 app.get("/serviciosMesGrafico/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
+ 
+    try {
+        let historialServicios = '';
+        if (id === '0') {
+            historialServicios = await pool.query(
+                `SELECT s.nombre_servicio, count(*)  FROM cita AS c
+                JOIN historial AS h ON c.id_cita = h.id_cita
+                JOIN servicio AS s ON s.id_servicio = c.id_servicio
+                WHERE to_char(current_timestamp, 'yy/mm/') = to_char(c.fecha_cita, 'yy/mm/') 
+                GROUP BY s.nombre_servicio;`,
+                function (err, result) {
+                    if (err) {
+                        res.status(400).send("Error en el query");
+                        return console.error('error en el query: ', err);
+                    }
+                    res.json(result.rows);
+                });
+        } else {
+            historialServicios = await pool.query(
+                `SELECT s.nombre_servicio, count(*)  FROM cita AS c
+                JOIN historial AS h ON c.id_cita = h.id_cita
+                JOIN servicio AS s ON s.id_servicio = c.id_servicio
+                WHERE h.id_usuario = '${id}' AND to_char(current_timestamp, 'yy/mm/') = to_char(c.fecha_cita, 'yy/mm/') 
+                GROUP BY s.nombre_servicio;`,
+                function (err, result) {
+                    if (err) {
+                        res.status(400).send("Error en el query");
+                        return console.error('error en el query: ', err);
+                    }
+                    res.json(result.rows);
+                });
+        }
 
+
+    } catch (err) {
+        console.log(err)
+    }
+
+});
+
+
+/* Creamos el API para obetener el top 3 de barberos con mas servicios en el mes actual */
+app.get("/serviciosTop/", verifyToken, async (req, res) => {
     try {
         const historialServicios = await pool.query(
-            `SELECT s.nombre_servicio, count(*)  FROM cita AS c
-            JOIN historial AS h ON c.id_cita = h.id_cita
-            JOIN servicio AS s ON s.id_servicio = c.id_servicio
-            WHERE h.id_usuario = '${id}' AND to_char(current_timestamp, 'yy/mm/') = to_char(c.fecha_cita, 'yy/mm/') 
-            GROUP BY s.nombre_servicio;`,
+            `select u.nombre_usuario, u.url_img_usuario, u.id_usuario, count(*) from historial as h
+            join cita as c on c.id_cita = h.id_cita
+            join usuario as u on u.id_usuario = h.id_usuario
+            where to_char(c.fecha_cita, 'yy/mm/') = to_char(current_timestamp, 'yy/mm/')
+            group by u.nombre_usuario, u.url_img_usuario, u.id_usuario
+            ORDER BY count(*) DESC`,
             function (err, result) {
                 if (err) {
                     res.status(400).send("Error en el query");
@@ -324,9 +419,6 @@ app.get("/serviciosMesGrafico/:id/", verifyToken, async (req, res) => {
     }
 
 });
-
-
-
 
 
 
