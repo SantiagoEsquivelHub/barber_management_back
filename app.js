@@ -3,11 +3,15 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const pool = require("./data_base/bd");
 const app = express();
+
+
+let bodyParser = require('body-parser');
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json());
+
 app.use(express.json());
 app.use(cors());
-
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb' }));
 
 /*----------- AUTENTICACIÓN ------------- */
 
@@ -38,8 +42,8 @@ app.post("/usuario/login", async (req, res) => {
     const usuario = req.body.usuario;
     const clave = req.body.clave;
     const use = await pool.query("SELECT correo_usuario , documento_usuario , id_usuario FROM usuario WHERE correo_usuario = $1;", [usuario]);
-    //console.log(use.rows[0]);
-    if (usuario == use.rows[0].correo_usuario && clave == use.rows[0].documento_usuario) {
+    console.log(use.rows[0]);
+    if (usuario == use.rows[0]?.correo_usuario && clave == use.rows[0]?.documento_usuario) {
 
         const token = jwt.sign(
             { userId: use.rows[0].id_usuario, email: use.rows[0].correo_usuario },
@@ -405,7 +409,9 @@ app.get("/serviciosTop/", verifyToken, async (req, res) => {
             join usuario as u on u.id_usuario = h.id_usuario
             where to_char(c.fecha_cita, 'yy/mm/') = to_char(current_timestamp, 'yy/mm/')
             group by u.nombre_usuario, u.url_img_usuario, u.id_usuario
-            ORDER BY count(*) DESC`,
+            ORDER BY count(*) DESC
+            LIMIT 3
+            `,
             function (err, result) {
                 if (err) {
                     res.status(400).send("Error en el query");
