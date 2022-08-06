@@ -105,7 +105,7 @@ app.get("/usuarios", verifyToken, async (req, res) => {
 
 /* Creamos el API para la creación de un nuevo usuario */
 app.post("/crearUsuario", verifyToken, async (req, res) => {
-    const { nombre_usuario, documento_usuario, telefono_usuario, fecha_nacimiento_usuario, correo_usuario, estado_usuario, url_img_usuario, rol_usuario } = req.body
+    const { nombre_usuario, documento_usuario, telefono_usuario, fecha_nacimiento_usuario, correo_usuario, estado_usuario, url_img_usuario, rol_usuario, id_admin } = req.body
 
     /* Validamos que el usuario no este creado primero */
     const verificarCorreo = await pool.query("SELECT correo_usuario FROM usuario WHERE correo_usuario = $1;", [req.body.correo_usuario]);
@@ -115,15 +115,19 @@ app.post("/crearUsuario", verifyToken, async (req, res) => {
         }
     } else { /* Si no esta creado entonces lo creamos */
         try {
-            const crearUsuario = await pool.query(`INSERT INTO usuario(nombre_usuario , documento_usuario , telefono_usuario , fecha_nacimiento_usuario , correo_usuario , estado_usuario , url_img_usuario , rol_usuario) VALUES ('${nombre_usuario}', ${documento_usuario}, ${telefono_usuario}, '${fecha_nacimiento_usuario}', '${correo_usuario}', ${estado_usuario}, '${url_img_usuario}', ${rol_usuario});`, function (err, result) {
-                if (err) {
-                    res.status(400).send("Error en el query");
-                    return console.error('error en el query', err);
-                }
-                res.status(200).send("Usuario creado con Exito :)");
-            });
+            const crearUsuario = await pool.query(`INSERT INTO usuario(nombre_usuario , documento_usuario , telefono_usuario , fecha_nacimiento_usuario , correo_usuario , estado_usuario , url_img_usuario , rol_usuario) VALUES ('${nombre_usuario}', ${documento_usuario}, ${telefono_usuario}, '${fecha_nacimiento_usuario}', '${correo_usuario}', ${estado_usuario}, '${url_img_usuario}', ${rol_usuario});`);
+
+            const id_barbero = await pool.query(`SELECT id_usuario FROM usuario WHERE correo_usuario = '${correo_usuario}'`);
+            await pool.query(`INSERT INTO contratacion(id_admin , id_barbero) VALUES (${id_admin}, ${id_barbero.rows[0].id_usuario});`);
+
+            res.status(200).send("Usuario creado con Exito :)");
+
+
+
+
         } catch (err) {
             console.log(err)
+            res.status(400).send("Error en el query");
         }
     }
 });
@@ -359,7 +363,7 @@ app.get("/serviciosHistorial/:id/", verifyToken, async (req, res) => {
 /* Creamos el API para obetener el historial de servicios que tiene el barbero, nombre del servicio y su precio */
 app.get("/serviciosMesGrafico/:id/", verifyToken, async (req, res) => {
     let { id } = req.params;
- 
+
     try {
         let historialServicios = '';
         if (id === '0') {
@@ -481,27 +485,6 @@ app.post("/idCita", verifyToken, async (req, res) => {
 
 /*----------- FIN CITAS ------------- */
 
-
-/*----------- CONTRATACIONES ------------- */
-
-/* Creamos el API para la creación de un nuevo usuario */
-app.post("/crearContratacion", verifyToken, async (req, res) => {
-    const { id_admin, id_barbero } = req.body
-    try {
-        const crearCita = await pool.query(`INSERT INTO contrataciones(id_admin , id_barbero) VALUES (${id_admin}, ${id_barbero});`, function (err, result) {
-            if (err) {
-                res.status(400).send("Error en el query");
-                return console.error('error en el query', err);
-            }
-            res.status(200).send("Contratación creada con Exito :)");
-        });
-    } catch (err) {
-        console.log(err)
-    }
-
-});
-
-/*----------- FIN CONTRATACIONES ------------- */
 
 /*----------- HISTORIAL ------------- */
 
