@@ -1,6 +1,4 @@
-Proyecto de Desarrollo de Software 1
-
-------- BACKEND -------
+### BACKEND
 
 Para ejecutar el backend siga estos pasos:
 
